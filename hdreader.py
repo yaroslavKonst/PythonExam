@@ -43,9 +43,13 @@ class Application:
         self.saveas_button.grid(sticky="EW", column=0, row=2)
         self.undo_button.grid(sticky="EW", column=0, row=3)
         self.redo_button.grid(sticky="EW", column=0, row=4)
+        self.scrollbar = tk.Scrollbar(master=self.main_frame)
+        self.scrollbar.grid(sticky="NS", row=0, column=2)
         self.text_field = tk.Text(master=self.main_frame, undo=True, width=80,
-                                  font=("Source Code Pro", 12))
+                                  font=("Source Code Pro", 12),
+                                  yscrollcommand=self.scrollbar.set)
         self.text_field.grid(sticky="NEWS", row=0, column=1)
+        self.scrollbar.config(command=self.text_field.yview)
         if self.in_file:
             self.open(self.in_file)
 
