@@ -4,7 +4,7 @@ import tkinter as tk
 import sys
 import os
 import subprocess
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import showerror
 
 
@@ -29,13 +29,16 @@ class Application:
 
         self.open_button = tk.Button(master=self.button_frame, text="Open",
                                      command=self.open_dial)
+        self.save_button = tk.Button(master=self.button_frame, text="Save",
+                                     command=self.save_dial)
         self.undo_button = tk.Button(master=self.button_frame, text="Undo",
                                      command=self.undo, state=tk.DISABLED)
         self.redo_button = tk.Button(master=self.button_frame, text="Redo",
                                      command=self.redo, state=tk.DISABLED)
         self.open_button.grid(sticky="EW", column=0, row=0)
-        self.undo_button.grid(sticky="EW", column=0, row=1)
-        self.redo_button.grid(sticky="EW", column=0, row=2)
+        self.save_button.grid(sticky="EW", column=0, row=1)
+        self.undo_button.grid(sticky="EW", column=0, row=2)
+        self.redo_button.grid(sticky="EW", column=0, row=3)
         self.text_field = tk.Text(master=self.main_frame, undo=True, width=80,
                                   font=("Source Code Pro", 12))
         self.text_field.grid(sticky="NEWS", row=0, column=1)
@@ -64,9 +67,23 @@ class Application:
                     .decode("UTF-8")
                 self.text_field.insert("1.0", text)
 
+    def save(self, filename):
+        if filename:
+            text = self.text_field.get("1.0", "end").encode()
+            subprocess.run(["xxd", "-r -g1", "-", filename], input=text,
+                           capture_output=True)
+
     def open_dial(self):
         filename = askopenfilename(title="Open file")
         self.open(filename)
+
+    def save_dial(self):
+        if self.out_file:
+            filename = self.out_file
+        else:
+            filename = asksaveasfilename(title="Save file")
+            self.out_file = filename
+        self.save(filename)
 
     def undo(self):
         self.text_field.edit_undo()
