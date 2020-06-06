@@ -14,6 +14,7 @@ class Application:
         self.out_file = None
         if len(sys.argv) >= 2:
             self.in_file = sys.argv[1]
+            self.out_file = sys.argv[1]
         if len(sys.argv) >= 3:
             self.out_file = sys.argv[2]
         self.main_frame = tk.Frame()
@@ -31,14 +32,17 @@ class Application:
                                      command=self.open_dial)
         self.save_button = tk.Button(master=self.button_frame, text="Save",
                                      command=self.save_dial)
+        self.saveas_button = tk.Button(master=self.button_frame, text="Save as",
+                                       command=self.saveas_dial)
         self.undo_button = tk.Button(master=self.button_frame, text="Undo",
                                      command=self.undo, state=tk.DISABLED)
         self.redo_button = tk.Button(master=self.button_frame, text="Redo",
                                      command=self.redo, state=tk.DISABLED)
         self.open_button.grid(sticky="EW", column=0, row=0)
         self.save_button.grid(sticky="EW", column=0, row=1)
-        self.undo_button.grid(sticky="EW", column=0, row=2)
-        self.redo_button.grid(sticky="EW", column=0, row=3)
+        self.saveas_button.grid(sticky="EW", column=0, row=2)
+        self.undo_button.grid(sticky="EW", column=0, row=3)
+        self.redo_button.grid(sticky="EW", column=0, row=4)
         self.text_field = tk.Text(master=self.main_frame, undo=True, width=80,
                                   font=("Source Code Pro", 12))
         self.text_field.grid(sticky="NEWS", row=0, column=1)
@@ -64,6 +68,7 @@ class Application:
                                         capture_output=True)
                 if status.returncode == 0:
                     self.in_file = filename
+                    self.out_file = filename
                     text = status.stdout.decode("UTF-8")
                     self.text_field.insert("1.0", text)
                 else:
@@ -74,12 +79,12 @@ class Application:
 
     def save(self, filename):
         if filename:
-            text = self.text_field.get("1.0", "end").encode()
+            text = self.text_field.get("1.0", "end").encode("UTF-8")
             status = subprocess.run(["xxd", "-r -g1", "-", filename],
                                     input=text, capture_output=True)
             if status.returncode != 0:
                 showerror("File save error",
-                              "%s\nFile can't be opened." % filename)
+                          "%s\nFile can't be opened." % filename)
 
     def open_dial(self):
         filename = askopenfilename(title="Open file")
@@ -91,6 +96,10 @@ class Application:
         else:
             filename = asksaveasfilename(title="Save file")
             self.out_file = filename
+        self.save(filename)
+
+    def saveas_dial(self):
+        filename = asksaveasfilename(title="Save file")
         self.save(filename)
 
     def undo(self):
