@@ -58,24 +58,23 @@ class Application:
             if not os.path.exists(filename):
                 showerror("File open error",
                           "%s\nFile does not exist." % filename)
-                self.in_file = None
             elif not os.path.isfile(filename):
                 showerror("File open error",
                           "%s\nis not a regular file." % filename)
-                self.in_file = None
             else:
                 status = subprocess.run(["xxd", "-g1", filename],
                                         capture_output=True)
                 if status.returncode == 0:
-                    self.in_file = filename
-                    self.out_file = filename
                     text = status.stdout.decode("UTF-8")
+                    self.text_field.delete("1.0", "end")
                     self.text_field.insert("1.0", text)
+                    self.update_title()
+                    return True
                 else:
                     showerror("File open error",
                               "%s\nFile can't be opened." % filename)
-                    self.in_file = None
             self.update_title()
+        return False
 
     def save(self, filename):
         if filename:
@@ -88,7 +87,10 @@ class Application:
 
     def open_dial(self):
         filename = askopenfilename(title="Open file")
-        self.open(filename)
+        ret = self.open(filename)
+        if ret:
+            self.in_file = filename
+            self.out_file = filename
 
     def save_dial(self):
         if self.out_file:
