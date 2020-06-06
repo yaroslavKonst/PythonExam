@@ -5,7 +5,7 @@ import sys
 import os
 import subprocess
 from tkinter.filedialog import askopenfilename, asksaveasfilename
-from tkinter.messagebox import showerror
+from tkinter.messagebox import showerror, showinfo
 
 
 class Application:
@@ -35,9 +35,9 @@ class Application:
         self.saveas_button = tk.Button(master=self.button_frame, text="Save as",
                                        command=self.saveas_dial)
         self.undo_button = tk.Button(master=self.button_frame, text="Undo",
-                                     command=self.undo, state=tk.DISABLED)
+                                     command=self.undo)
         self.redo_button = tk.Button(master=self.button_frame, text="Redo",
-                                     command=self.redo, state=tk.DISABLED)
+                                     command=self.redo)
         self.open_button.grid(sticky="EW", column=0, row=0)
         self.save_button.grid(sticky="EW", column=0, row=1)
         self.saveas_button.grid(sticky="EW", column=0, row=2)
@@ -68,6 +68,7 @@ class Application:
                     text = status.stdout.decode("UTF-8")
                     self.text_field.delete("1.0", "end")
                     self.text_field.insert("1.0", text)
+                    self.text_field.edit_reset()
                     self.update_title()
                     return True
                 else:
@@ -105,10 +106,16 @@ class Application:
         self.save(filename)
 
     def undo(self):
-        self.text_field.edit_undo()
+        try:
+            self.text_field.edit_undo()
+        except Exception:
+            showinfo("Undo","No changes left to undo.")
 
     def redo(self):
-        self.text_field.edit_redo()
+        try:
+            self.text_field.edit_redo()
+        except Exception:
+            showinfo("Redo","Nothing to redo.")
 
     def run(self):
         tk.mainloop()
