@@ -60,18 +60,26 @@ class Application:
                           "%s\nis not a regular file." % filename)
                 self.in_file = None
             else:
-                self.in_file = filename
-                self.update_title()
-                text = subprocess.run(["xxd", "-g1", filename],
-                                      capture_output=True).stdout\
-                    .decode("UTF-8")
-                self.text_field.insert("1.0", text)
+                status = subprocess.run(["xxd", "-g1", filename],
+                                        capture_output=True)
+                if status.returncode == 0:
+                    self.in_file = filename
+                    text = status.stdout.decode("UTF-8")
+                    self.text_field.insert("1.0", text)
+                else:
+                    showerror("File open error",
+                              "%s\nFile can't be opened." % filename)
+                    self.in_file = None
+            self.update_title()
 
     def save(self, filename):
         if filename:
             text = self.text_field.get("1.0", "end").encode()
-            subprocess.run(["xxd", "-r -g1", "-", filename], input=text,
-                           capture_output=True)
+            status = subprocess.run(["xxd", "-r -g1", "-", filename],
+                                    input=text, capture_output=True)
+            if status.returncode != 0:
+                showerror("File save error",
+                              "%s\nFile can't be opened." % filename)
 
     def open_dial(self):
         filename = askopenfilename(title="Open file")
